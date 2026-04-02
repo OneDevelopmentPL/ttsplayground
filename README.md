@@ -1,6 +1,7 @@
 # TTS Playground 🎙️
 
 [English](#english) | [Polski](#polski)
+[Visit site / Odwiedź stronę](onedevelopmentpl.github.io/ttsplayground)
 
 ---
 
@@ -62,4 +63,4 @@
 
 ---
 
-Made with ❤️ by [Antigravity](https://google.com)
+Made with ❤️ by OneDevelopment
