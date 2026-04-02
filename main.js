@@ -35,7 +35,7 @@ const translations = {
         charCount: '{count} characters'
     },
     pl: {
-        title: 'Poligon TTS',
+        title: 'TTS Playground',
         inputLabel: 'Wprowadź tekst poniżej',
         inputPlaceholder: 'Wpisz lub wklej tekst tutaj...',
         clear: 'Wyczyść',
@@ -299,9 +299,43 @@ function setupEventListeners() {
     elements.btnPlay.addEventListener('click', speak);
     elements.btnStop.addEventListener('click', stop);
     
-    elements.btnDownload.addEventListener('click', () => {
-        alert('MP3 download is simulated in this browser-native demo. To implement actual export, a server-side TTS or complex AudioContext routing is required.');
-    });
+    elements.btnDownload.addEventListener('click', startRecordingDownload);
+}
+
+/**
+ * Advanced: High-Quality MP3 Download
+ * Uses a more stable Google Translate API endpoint for reliable MP3 generation.
+ */
+function startRecordingDownload() {
+    const text = elements.textInput.value.trim();
+    if (!text) return;
+
+    // Get language code from selected voice (e.g., 'pl-PL' -> 'pl')
+    const selectedVoiceName = elements.voiceSelect.value;
+    const voice = state.voices.find(v => v.name === selectedVoiceName);
+    const langCode = (voice ? voice.lang : state.lang).split('-')[0];
+
+    // Character limit handling (Google TTS limit is ~200 chars)
+    if (text.length > 200) {
+        const confirmLong = confirm(state.lang === 'en' ? 
+            'The high-quality MP3 generator has a 200-character limit. Only the first 200 characters will be downloaded. Continue?' : 
+            'Generator MP3 wysokiej jakości ma limit 200 znaków. Pobrane zostanie tylko pierwsze 200 znaków. Kontynuować?');
+        if (!confirmLong) return;
+    }
+
+    const encodedText = encodeURIComponent(text.substring(0, 200));
+    
+    // New, more stable URL using googleapis.com and client=gtx
+    const downloadUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&total=1&idx=0&textlen=${text.length}&client=gtx`;
+
+    elements.statusText.textContent = state.lang === 'en' ? 'Generating MP3...' : 'Generowanie MP3...';
+
+    // Trigger download - using window.open as it's the most reliable for these direct audio links
+    window.open(downloadUrl, '_blank');
+    
+    setTimeout(() => {
+        elements.statusText.textContent = translations[state.lang].statusReady;
+    }, 1000);
 }
 
 // Start
