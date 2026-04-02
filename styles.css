@@ -234,6 +234,32 @@ input[type="range"]:active::-webkit-slider-thumb {
 .playback-controls {
     display: flex;
     gap: 12px;
+    height: 48px; /* Fixed height to prevent layout shift during animation */
+    overflow: hidden;
+}
+
+#btn-stop {
+    opacity: 0;
+    max-width: 0;
+    padding: 0;
+    margin: 0;
+    pointer-events: none;
+    transform: scale(0.95); /* Start slightly smaller */
+    transition: 
+        opacity 0.4s ease,
+        max-width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+        padding 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.playing #btn-stop {
+    opacity: 1;
+    max-width: 200px;
+    padding: 12px 24px;
+    pointer-events: all;
+    transform: scale(1); /* Return to full size */
 }
 
 .btn-primary, .btn-secondary, .btn-danger, .btn-toggle {

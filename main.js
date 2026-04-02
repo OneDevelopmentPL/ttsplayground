@@ -200,7 +200,7 @@ function speak() {
         state.isPlaying = true;
         updatePlayButtonUI();
         elements.statusText.textContent = translations[state.lang].statusSpeaking;
-        document.body.classList.add('playing');
+        // The class is already added in speak() for immediate UI feedback
     };
 
     state.currentUtterance.onend = () => {
@@ -228,6 +228,7 @@ function speak() {
         }
     };
 
+    document.body.classList.add('playing');
     speechSynthesis.speak(state.currentUtterance);
 }
 
