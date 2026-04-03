@@ -3,13 +3,14 @@
  */
 
 const state = {
-    lang: 'en', // 'en' or 'pl'
+    lang: 'en', // UI language: 'en' or 'pl'
     voices: [],
     currentUtterance: null,
     isPlaying: false,
     text: '',
     speed: 1.0,
     pitch: 1.0,
+    selectedLangCode: localStorage.getItem('tts-lang-code') || '',
     selectedVoiceName: localStorage.getItem('tts-voice') || ''
 };
 
@@ -19,7 +20,8 @@ const translations = {
         inputLabel: 'Enter Text Below',
         inputPlaceholder: 'Type or paste your text here...',
         clear: 'Clear',
-        voiceLabel: 'Voice & Language',
+        languageLabel: 'Select Language',
+        voiceLabel: 'Select Voice',
         loadingVoices: 'Loading voices...',
         speedLabel: 'Speed',
         pitchLabel: 'Pitch',
@@ -38,7 +40,8 @@ const translations = {
         inputLabel: 'Wprowadź tekst poniżej',
         inputPlaceholder: 'Wpisz lub wklej tekst tutaj...',
         clear: 'Wyczyść',
-        voiceLabel: 'Głos i Język',
+        languageLabel: 'Wybierz Język',
+        voiceLabel: 'Wybierz Głos',
         loadingVoices: 'Ładowanie głosów...',
         speedLabel: 'Prędkość',
         pitchLabel: 'Ton',
@@ -62,8 +65,11 @@ const elements = {
     charCount: document.getElementById('char-count'),
     btnClear: document.getElementById('btn-clear'),
     uiClear: document.getElementById('ui-clear'),
+    languageLabel: document.getElementById('ui-language-label'),
+    languageSelect: document.getElementById('language-select'),
     voiceLabel: document.getElementById('ui-voice-label'),
     voiceSelect: document.getElementById('voice-select'),
+    voiceWrapper: document.getElementById('voice-wrapper'),
     speedLabel: document.getElementById('ui-speed-label'),
     speedVal: document.getElementById('speed-val'),
     rateInput: document.getElementById('rate'),
@@ -107,39 +113,51 @@ function init() {
 }
 
 /**
- * Load and Filter Voices
+ * Load and Organize Voices
  */
 function loadVoices() {
     state.voices = speechSynthesis.getVoices();
-    
     if (state.voices.length === 0) return;
 
-    elements.voiceSelect.innerHTML = '';
+    // Extract unique language codes (e.g., 'PL', 'EN')
+    const languages = [...new Set(state.voices.map(v => v.lang.split('-')[0].toUpperCase()))].sort();
     
-    // Sort voices: Native first, then by language
-    const sortedVoices = [...state.voices].sort((a, b) => {
-        if (a.localService && !b.localService) return -1;
-        if (!a.localService && b.localService) return 1;
-        return a.lang.localeCompare(b.lang);
-    });
-
-    sortedVoices.forEach(voice => {
+    elements.languageSelect.innerHTML = '<option value="" disabled selected>Select Language</option>';
+    languages.forEach(lang => {
         const option = document.createElement('option');
-        option.textContent = `${voice.name} (${voice.lang})`;
-        option.value = voice.name;
-        
-        if (voice.name === state.selectedVoiceName) {
+        option.value = lang.toLowerCase();
+        option.textContent = lang;
+        if (state.selectedLangCode === lang.toLowerCase()) {
             option.selected = true;
         }
-        
+        elements.languageSelect.appendChild(option);
+    });
+
+    // If we have a saved language, populate voices immediately
+    if (state.selectedLangCode) {
+        populateVoicesForLanguage(state.selectedLangCode);
+    }
+}
+
+/**
+ * Populate Voice Select based on selected language
+ */
+function populateVoicesForLanguage(langCode) {
+    const filteredVoices = state.voices.filter(v => v.lang.toLowerCase().startsWith(langCode));
+    
+    elements.voiceSelect.innerHTML = '';
+    filteredVoices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        if (state.selectedVoiceName === voice.name) {
+            option.selected = true;
+        }
         elements.voiceSelect.appendChild(option);
     });
 
-    // If no voice was selected/couldn't find previous, pick first matching lang or default
-    if (!elements.voiceSelect.value && sortedVoices.length > 0) {
-        const defaultVoice = sortedVoices.find(v => v.lang.startsWith(state.lang)) || sortedVoices[0];
-        elements.voiceSelect.value = defaultVoice.name;
-    }
+    // Animate reveal
+    elements.voiceWrapper.classList.add('is-visible');
 }
 
 /**
@@ -151,6 +169,7 @@ function updateUIStrings() {
     elements.inputLabel.textContent = t.inputLabel;
     elements.textInput.placeholder = t.inputPlaceholder;
     elements.uiClear.textContent = t.clear;
+    elements.languageLabel.textContent = t.languageLabel;
     elements.voiceLabel.textContent = t.voiceLabel;
     elements.speedLabel.textContent = t.speedLabel;
     elements.pitchLabel.textContent = t.pitchLabel;
@@ -200,7 +219,6 @@ function speak() {
         state.isPlaying = true;
         updatePlayButtonUI();
         elements.statusText.textContent = translations[state.lang].statusSpeaking;
-        // The class is already added in speak() for immediate UI feedback
     };
 
     state.currentUtterance.onend = () => {
@@ -285,6 +303,12 @@ function setupEventListeners() {
         state.pitch = parseFloat(e.target.value);
         elements.pitchVal.textContent = state.pitch.toFixed(1);
         localStorage.setItem('tts-pitch', state.pitch);
+    });
+
+    elements.languageSelect.addEventListener('change', (e) => {
+        state.selectedLangCode = e.target.value;
+        localStorage.setItem('tts-lang-code', state.selectedLangCode);
+        populateVoicesForLanguage(state.selectedLangCode);
     });
 
     elements.voiceSelect.addEventListener('change', (e) => {

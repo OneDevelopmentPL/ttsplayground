@@ -14,7 +14,7 @@
 <body class="theme-blue">
     <div class="app-container">
         <!-- Header -->
-        <header class="app-header">
+        <header class="app-header fade-in-down">
             <div class="logo">
                 <i class="ph ph-waveform"></i>
                 <h1 id="ui-title">TTS Playground</h1>
@@ -29,7 +29,7 @@
         <!-- Main Content -->
         <main class="app-main">
             <!-- Text Input Area -->
-            <section class="input-section glass">
+            <section class="input-section glass slide-in-left">
                 <div class="section-header">
                     <h2 id="ui-input-label">Enter Text Below</h2>
                     <span class="char-count" id="char-count">0 characters</span>
@@ -43,12 +43,21 @@
             </section>
 
             <!-- Controls Sidebar/Panel -->
-            <aside class="controls-panel glass">
+            <aside class="controls-panel glass slide-in-right">
                 <div class="control-group">
-                    <label id="ui-voice-label">Voice & Language</label>
-                    <select id="voice-select" class="custom-select">
-                        <option value="" disabled selected id="ui-loading-voices">Loading voices...</option>
+                    <label id="ui-language-label">Language</label>
+                    <select id="language-select" class="custom-select">
+                        <option value="" disabled selected>Select Language</option>
                     </select>
+                </div>
+
+                <div id="voice-wrapper" class="voice-reveal">
+                    <div class="control-group">
+                        <label id="ui-voice-label">Voice</label>
+                        <select id="voice-select" class="custom-select">
+                            <option value="" disabled selected id="ui-loading-voices">Loading voices...</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="control-group">
