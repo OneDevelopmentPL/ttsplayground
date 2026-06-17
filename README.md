@@ -1,7 +1,7 @@
 # TTS Playground 🎙️
 
 [English](#english) | [Polski](#polski)
-<br> [Visit site / Odwiedź stronę](onedevelopmentpl.github.io/ttsplayground)
+<br> [Visit site / Odwiedź stronę](https://onedevelopmentpl.github.io/ttsplayground)
 
 ---
 
